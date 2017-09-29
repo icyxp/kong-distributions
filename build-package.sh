@@ -107,16 +107,17 @@ done
 for i in "${platforms_to_build[@]}"
 do
   # Deleting Docker images
-  docker rm -f $(docker ps -a -q) || true
-  docker rmi -f $(docker images -q) || true
+  # docker rm -f $(docker ps -a -q) || true
+  # docker rmi -f $(docker images -q) || true
   echo "Building for $i"
   if [[ "$i" == "osx" ]]; then
     /bin/bash $DIR/.build-package-script.sh ${KONG_VERSION}
   elif [[ "$i" == "aws" ]]; then
     echo "TODO: Build on AWS Linux AMI!"
   else
-    docker pull $i # Because of https://github.com/CentOS/CentOS-Dockerfiles/issues/33
-    docker run -v $DIR/:/build-data $i /bin/bash -c "/build-data/.build-package-script.sh ${KONG_VERSION}"
+    #docker pull $i # Because of https://github.com/CentOS/CentOS-Dockerfiles/issues/33
+    #docker run -v $DIR/:/build-data $i /bin/bash -c "/build-data/.build-package-script.sh ${KONG_VERSION}"
+    docker run -v $DIR/:/build-data build_kong:7 /bin/bash -c "/build-data/.build-package-script.sh ${KONG_VERSION}"
   fi
   if [ $? -ne 0 ]; then
     echo "Error building for $i"

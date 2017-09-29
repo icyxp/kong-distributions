@@ -22,12 +22,12 @@ if [ "$DIR" == "/" ]; then
 fi
 OUT=/tmp/build/out
 TMP=/tmp/build/tmp
-echo "Cleaning directories"
-rm -rf $OUT
-rm -rf $TMP
-echo "Preparing environment"
-mkdir -p $OUT
-mkdir -p $TMP
+#echo "Cleaning directories"
+#rm -rf $OUT
+#rm -rf $TMP
+#echo "Preparing environment"
+#mkdir -p $OUT
+#mkdir -p $TMP
 
 # Load dependencies versions
 LUA_VERSION=5.1.4
@@ -65,8 +65,8 @@ if [ "$(uname)" = "Darwin" ]; then
 
   FINAL_BUILD_OUTPUT="$DIR/build-output"
 elif hash yum 2>/dev/null; then
-  yum -y install epel-release
-  yum -y install wget tar make curl ldconfig gcc perl pcre-devel openssl-devel ldconfig unzip git rpm-build ncurses-devel which lua-$LUA_VERSION lua-devel-$LUA_VERSION gpg pkgconfig xz-devel ruby-devel
+  #yum -y install epel-release
+  #yum -y install wget tar make curl ldconfig gcc perl pcre-devel openssl-devel ldconfig unzip git rpm-build ncurses-devel which lua-$LUA_VERSION lua-devel-$LUA_VERSION gpg pkgconfig xz-devel ruby-devel
 
   FPM_PARAMS="-d 'epel-release' -d 'openssl' -d 'pcre' -d 'perl'"
   if [[ $IS_AWS == true ]]; then
@@ -78,14 +78,14 @@ elif hash yum 2>/dev/null; then
   fi
 
   # Install Ruby for fpm
-  cd $TMP
-  wget https://cache.ruby-lang.org/pub/ruby/2.2/ruby-2.2.5.tar.gz --no-check-certificate
-  tar xvfvz ruby-2.2.5.tar.gz
-  cd ruby-2.2.5
-  ./configure
-  make
-  make install
-  gem update --system
+  #cd $TMP
+  #wget https://cache.ruby-lang.org/pub/ruby/2.2/ruby-2.2.5.tar.gz --no-check-certificate
+  #tar xvfvz ruby-2.2.5.tar.gz
+  #cd ruby-2.2.5
+  #./configure
+  #make
+  #make install
+  #gem update --system
 
   PACKAGE_TYPE="rpm"
   LUA_MAKE="linux"
@@ -115,7 +115,7 @@ fi
 export PATH=$PATH:${OUT}/usr/local/bin:$(gem environment | awk -F': *' '/EXECUTABLE DIRECTORY/ {print $2}')
 
 # Check if the Kong version exists
-if ! [ `curl -s -o /dev/null -w "%{http_code}" https://github.com/Mashape/kong/tree/$KONG_BRANCH` == "200" ]; then
+if ! [ `curl -s -o /dev/null -w "%{http_code}" https://github.com/icyxp/kong/tree/$KONG_BRANCH` == "200" ]; then
   echo "Kong version \"$KONG_BRANCH\" doesn't exist!"
   exit 1
 else
@@ -123,16 +123,16 @@ else
 fi
 
 # Download OpenSSL
-cd $TMP
-wget ftp://ftp.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz -O openssl-$OPENSSL_VERSION.tar.gz
-tar xzf openssl-$OPENSSL_VERSION.tar.gz
+#cd $TMP
+#wget ftp://ftp.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz -O openssl-$OPENSSL_VERSION.tar.gz
+#tar xzf openssl-$OPENSSL_VERSION.tar.gz
 if [ "$(uname)" = "Darwin" ]; then # Checking if OS X
   export KERNEL_BITS=64 # This sets the right OpenSSL variable for OS X
 fi
 OPENRESTY_CONFIGURE="--with-openssl=$TMP/openssl-$OPENSSL_VERSION --without-luajit-lua52"
 
 # Install fpm
-gem install fpm
+#gem install fpm
 
 ##############################################################
 # Starting building software (to be included in the package) #
@@ -166,16 +166,16 @@ if [ "$(uname)" = "Darwin" ]; then
 fi
 
 cd $TMP
-wget https://openresty.org/download/openresty-$OPENRESTY_VERSION.tar.gz
-tar xzf openresty-$OPENRESTY_VERSION.tar.gz
+#wget https://openresty.org/download/openresty-$OPENRESTY_VERSION.tar.gz
+#tar xzf openresty-$OPENRESTY_VERSION.tar.gz
 cd openresty-$OPENRESTY_VERSION
 ./configure --with-pcre-jit --with-ipv6 --with-http_realip_module --with-http_ssl_module --with-http_stub_status_module ${OPENRESTY_CONFIGURE}
 make
 make install DESTDIR=$OUT
 
 cd $TMP
-wget http://luajit.org/download/LuaJIT-$LUAJIT_VERSION.tar.gz
-tar xzf LuaJIT-$LUAJIT_VERSION.tar.gz
+#wget http://luajit.org/download/LuaJIT-$LUAJIT_VERSION.tar.gz
+#tar xzf LuaJIT-$LUAJIT_VERSION.tar.gz
 cd LuaJIT-$LUAJIT_VERSION
 make $LUAJIT_MAKE
 make install DESTDIR=$OUT
@@ -190,8 +190,8 @@ cd $OUT
 
 # Install LuaRocks
 cd $TMP
-wget http://luarocks.org/releases/luarocks-$LUAROCKS_VERSION.tar.gz
-tar xzf luarocks-$LUAROCKS_VERSION.tar.gz
+#wget http://luarocks.org/releases/luarocks-$LUAROCKS_VERSION.tar.gz
+#tar xzf luarocks-$LUAROCKS_VERSION.tar.gz
 cd luarocks-$LUAROCKS_VERSION
 ./configure --with-lua-include=/usr/local/include/luajit-2.1 --lua-suffix=jit --lua-version=5.1 --with-lua=/usr/local
 make build
@@ -214,17 +214,18 @@ cd $TMP
 if [ "$(uname)" = "Darwin" ]; then
   wget https://releases.hashicorp.com/serf/${SERF_VERSION}/serf_${SERF_VERSION}_darwin_amd64.zip --no-check-certificate
   unzip serf_${SERF_VERSION}_darwin_amd64.zip
-else
-  wget https://releases.hashicorp.com/serf/${SERF_VERSION}/serf_${SERF_VERSION}_linux_amd64.zip --no-check-certificate
-  unzip serf_${SERF_VERSION}_linux_amd64.zip
+#else
+  #wget https://releases.hashicorp.com/serf/${SERF_VERSION}/serf_${SERF_VERSION}_linux_amd64.zip --no-check-certificate
+  #unzip serf_${SERF_VERSION}_linux_amd64.zip
 fi
 mkdir -p $OUT/usr/local/bin/
 cp serf $OUT/usr/local/bin/
 
 # Install Kong
 cd $TMP
-git clone https://github.com/Mashape/kong.git
+#git clone https://github.com/icyxp/kong.git
 cd kong
+git pull
 git checkout $KONG_BRANCH
 $OUT/usr/local/bin/luarocks make kong-*.rockspec $LUAROCKS_PARAMS
 
@@ -283,3 +284,4 @@ mkdir -p $FINAL_BUILD_OUTPUT
 cp $(find $OUT -maxdepth 1 -type f -name "kong*.*" | head -1) $FINAL_BUILD_OUTPUT/kong-$KONG_VERSION$FINAL_FILE_NAME_SUFFIX
 
 echo "DONE"
+
