@@ -107,8 +107,8 @@ done
 for i in "${platforms_to_build[@]}"
 do
   # Deleting Docker images
-  docker rm -f $(docker ps -a -q) || true
-  docker rmi -f $(docker images -q) || true
+  #docker rm -f $(docker ps -a -q) || true
+  #docker rmi -f $(docker images -q) || true
   echo "Building for $i"
   if [[ "$i" == "osx" ]]; then
     /bin/bash $DIR/.build-package-script.sh ${KONG_VERSION}
