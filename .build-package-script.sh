@@ -34,9 +34,8 @@ LUA_VERSION=5.1.4
 LUAJIT_VERSION=2.1.0-beta2
 PCRE_VERSION=8.40
 LUAROCKS_VERSION=2.4.2
-OPENRESTY_VERSION=1.11.2.2
-OPENSSL_VERSION=1.0.2k
-SERF_VERSION=0.7.0
+OPENRESTY_VERSION=1.11.2.4
+OPENSSL_VERSION=1.0.2l
 
 # Variables to be used in the build process
 PACKAGE_TYPE=""
@@ -53,7 +52,6 @@ FINAL_BUILD_OUTPUT="/build-data/build-output"
 
 if [ "$(uname)" = "Darwin" ]; then
   brew install gpg
-  #brew install ruby
 
   PACKAGE_TYPE="osxpkg"
   LUA_MAKE="macosx"
@@ -129,7 +127,7 @@ fi
 if [ "$(uname)" = "Darwin" ]; then # Checking if OS X
   export KERNEL_BITS=64 # This sets the right OpenSSL variable for OS X
 fi
-OPENRESTY_CONFIGURE="--with-openssl=$TMP/openssl-$OPENSSL_VERSION --without-luajit-lua52"
+OPENRESTY_CONFIGURE="--with-openssl=$TMP/openssl-$OPENSSL_VERSION"
 
 # Install fpm
 #gem install fpm
@@ -158,10 +156,6 @@ if [ "$(uname)" = "Darwin" ]; then
   make install INSTALL_TOP=$OUT/usr/local
   cd $OUT
 
-  # Copy libcrypto
-  # mkdir -p $OUT/usr/local/lib/
-  # cp /usr/local/lib/libcrypto.1.1.dylib $OUT/usr/local/lib/libcrypto.1.1.dylib
-
   OPENRESTY_CONFIGURE=$OPENRESTY_CONFIGURE" --with-cc-opt=-I$OUT/usr/local/include --with-ld-opt=-L$OUT/usr/local/lib -j8"
 fi
 
@@ -169,7 +163,7 @@ cd $TMP
 #wget https://openresty.org/download/openresty-$OPENRESTY_VERSION.tar.gz
 #tar xzf openresty-$OPENRESTY_VERSION.tar.gz
 cd openresty-$OPENRESTY_VERSION
-./configure --with-pcre-jit --with-ipv6 --with-http_realip_module --with-http_ssl_module --with-http_stub_status_module ${OPENRESTY_CONFIGURE}
+./configure --with-pcre-jit --with-ipv6 --with-http_realip_module --with-http_ssl_module --with-http_stub_status_module --with-http_v2_module ${OPENRESTY_CONFIGURE}
 make
 make install DESTDIR=$OUT
 
@@ -208,18 +202,6 @@ rocks_trees = {
 
 export LUAROCKS_CONFIG=$rocks_config
 export LUA_PATH=${OUT}/usr/local/share/lua/5.1/?.lua
-
-# Install Serf
-cd $TMP
-if [ "$(uname)" = "Darwin" ]; then
-  wget https://releases.hashicorp.com/serf/${SERF_VERSION}/serf_${SERF_VERSION}_darwin_amd64.zip --no-check-certificate
-  unzip serf_${SERF_VERSION}_darwin_amd64.zip
-#else
-  #wget https://releases.hashicorp.com/serf/${SERF_VERSION}/serf_${SERF_VERSION}_linux_amd64.zip --no-check-certificate
-  #unzip serf_${SERF_VERSION}_linux_amd64.zip
-fi
-mkdir -p $OUT/usr/local/bin/
-cp serf $OUT/usr/local/bin/
 
 # Install Kong
 cd $TMP
