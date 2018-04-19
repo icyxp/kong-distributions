@@ -209,7 +209,7 @@ cd $TMP
 cd kong
 git pull
 git checkout $KONG_BRANCH
-$OUT/usr/local/bin/luarocks make kong-*.rockspec $LUAROCKS_PARAMS
+export http_proxy=http://api-gateway.innosnap.com:3128 && $OUT/usr/local/bin/luarocks make kong-*.rockspec $LUAROCKS_PARAMS
 
 # Extract the version from the rockspec file
 rockspec_filename=`basename $TMP/kong/kong-*.rockspec`

@@ -61,7 +61,7 @@ fi
 #                      Check Arguments                       #
 ##############################################################
 
-supported_platforms=( centos:6 centos:7 debian:7 debian:8 ubuntu:12.04.5 ubuntu:14.04.2 ubuntu:15.04 ubuntu:16.04 osx )
+supported_platforms=( centos:6 centos:7 debian:7 debian:8 ubuntu:12.04.5 ubuntu:14.04.2 ubuntu:15.04 ubuntu:16.04 osx build_kong:7 build_kong:6)
 platforms_to_build=( )
 
 for var in "$ARG_PLATFORMS"
@@ -116,8 +116,7 @@ do
     echo "TODO: Build on AWS Linux AMI!"
   else
     #docker pull $i # Because of https://github.com/CentOS/CentOS-Dockerfiles/issues/33
-    #docker run -v $DIR/:/build-data $i /bin/bash -c "/build-data/.build-package-script.sh ${KONG_VERSION}"
-    docker run -v $DIR/:/build-data build_kong:7 /bin/bash -c "/build-data/.build-package-script.sh ${KONG_VERSION}"
+    docker run -v $DIR/:/build-data $i /bin/bash -c "/build-data/.build-package-script.sh ${KONG_VERSION}"
   fi
   if [ $? -ne 0 ]; then
     echo "Error building for $i"
